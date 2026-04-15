@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Huffman Coding Visualizer</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+  <!-- LOADING SCREEN -->
+  <div id="loader">
+    <div class="loader-inner">
+      <div class="loader-logo">HCV</div>
+      <div class="loader-bar"><div class="loader-fill"></div></div>
+      <div class="loader-text">Initializing Tree Engine...</div>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <nav id="navbar">
+    <div class="nav-brand">
+      <span class="brand-icon">🗝️</span>
+      <span>HuffmanVisualizer</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#visualizer">Visualizer</a></li>
+      <li><a href="#tree-section">Tree</a></li>
+      <li><a href="#output-section">Output</a></li>
+      <li><a href="#learn">Learn</a></li>
+    </ul>
+    <div class="nav-toggle" id="navToggle">
+      <span></span><span></span><span></span>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <canvas id="heroCanvas"></canvas>
+    <div class="hero-content">
+      <div class="hero-badge">DAA Huffman Coding Algorithm Visualizer</div>
+      <h1 class="hero-title">
+        <span class="line1">Huffman</span>
+        <span class="line2">Coding</span>
+        <span class="line3">Visualizer</span>
+      </h1>
+      <p class="hero-sub">Compress Data Smartly Using Trees</p>
+      <p class="hero-desc">Explore the elegance of lossless data compression through interactive, animated tree-building and encoding visualization.</p>
+      <div class="hero-btns">
+        <a href="#visualizer" class="btn-primary">
+          <span>Start Visualizer</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href="#learn" class="btn-ghost">Learn Huffman</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><span class="stat-val">O(n log n)</span><span class="stat-label">Time Complexity</span></div>
+        <div class="stat-div"></div>
+        <div class="stat"><span class="stat-val">Lossless</span><span class="stat-label">Compression</span></div>
+        <div class="stat-div"></div>
+        <div class="stat"><span class="stat-val">1952</span><span class="stat-label">Invented By</span></div>
+      </div>
+    </div>
+    <div class="scroll-indicator">
+      <div class="scroll-dot"></div>
+    </div>
+  </section>
+
+  <!-- VISUALIZER INPUT -->
+  <section id="visualizer">
+    <div class="container">
+      <div class="section-label">Step 01</div>
+      <h2 class="section-title">Enter Your Text</h2>
+      <p class="section-desc">Type any text or pick a quick example to begin the visualization.</p>
+
+      <div class="input-card glass">
+        <div class="input-top">
+          <label class="input-label">Input Text</label>
+          <span class="char-count" id="charCount">0 characters</span>
+        </div>
+        <textarea id="textInput" class="text-input" placeholder="Type your text here..." maxlength="500" rows="4"></textarea>
+        <div class="quick-fill">
+          <span class="qf-label">Quick Examples:</span>
+          <button class="qf-btn" data-text="BANANA">BANANA</button>
+          <button class="qf-btn" data-text="HELLO WORLD">HELLO WORLD</button>
+          <button class="qf-btn" data-text="MISSISSIPPI">MISSISSIPPI</button>
+          <button class="qf-btn" data-text="DATA STRUCTURE">DATA STRUCTURE</button>
+        </div>
+        <div class="action-btns">
+          <button class="btn-action btn-generate" id="btnGenerate">
+            <span class="btn-icon">⬡</span> Generate Tree
+          </button>
+          <button class="btn-action btn-encode" id="btnEncode">
+            <span class="btn-icon">→</span> Encode
+          </button>
+          <button class="btn-action btn-decode" id="btnDecode">
+            <span class="btn-icon">←</span> Decode
+          </button>
+          <button class="btn-action btn-reset" id="btnReset">
+            <span class="btn-icon">↺</span> Reset
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FREQUENCY TABLE -->
+  <section id="freq-section" class="hidden">
+    <div class="container">
+      <div class="section-label">Step 02</div>
+      <h2 class="section-title">Frequency Analysis</h2>
+      <p class="section-desc">Character frequencies sorted from highest to lowest occurrence.</p>
+      <div class="freq-table-wrap glass" id="freqTableWrap">
+        <table class="freq-table">
+          <thead>
+            <tr>
+              <th>Character</th>
+              <th>Frequency</th>
+              <th>Proportion</th>
+              <th>Visual</th>
+            </tr>
+          </thead>
+          <tbody id="freqTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP PANEL -->
+  <section id="steps-section" class="hidden">
+    <div class="container">
+      <div class="section-label">Step 03</div>
+      <h2 class="section-title">Algorithm Steps</h2>
+      <p class="section-desc">Follow along as Huffman's algorithm builds the optimal prefix-free code.</p>
+      <div class="steps-grid" id="stepsGrid"></div>
+    </div>
+  </section>
+
+  <!-- HUFFMAN TREE -->
+  <section id="tree-section" class="hidden">
+    <div class="container">
+      <div class="section-label">Step 04</div>
+      <h2 class="section-title">Huffman Tree</h2>
+      <p class="section-desc">Hover any node to inspect its character, frequency, and code. Use controls to pan and zoom.</p>
+      <div class="tree-controls">
+        <button class="ctrl-btn" id="zoomIn">＋</button>
+        <button class="ctrl-btn" id="zoomOut">－</button>
+        <button class="ctrl-btn" id="zoomReset">⟳</button>
+        <span class="zoom-label" id="zoomLabel">100%</span>
+      </div>
+      <div class="tree-wrap glass" id="treeWrap">
+        <svg id="treeSVG" width="100%" height="100%"></svg>
+        <div class="tree-tooltip" id="treeTooltip"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OUTPUT TABLE -->
+  <section id="output-section" class="hidden">
+    <div class="container">
+      <div class="section-label">Step 05</div>
+      <h2 class="section-title">Huffman Codes</h2>
+      <p class="section-desc">Generated binary codes for each character in your text.</p>
+
+      <div class="output-grid">
+        <div class="code-table-wrap glass">
+          <table class="code-table">
+            <thead>
+              <tr>
+                <th>Character</th>
+                <th>Code</th>
+                <th>Length</th>
+                <th>Bits Used</th>
+              </tr>
+            </thead>
+            <tbody id="codeTableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="stats-panel glass">
+          <h3 class="stats-title">Compression Stats</h3>
+          <div class="stat-ring-wrap">
+            <svg class="stat-ring" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="10"/>
+              <circle cx="60" cy="60" r="50" fill="none" stroke="url(#ringGrad)" stroke-width="10"
+                stroke-dasharray="314" stroke-dashoffset="314" stroke-linecap="round"
+                id="ringProgress" transform="rotate(-90 60 60)"/>
+              <defs>
+                <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#00e5ff"/>
+                  <stop offset="100%" stop-color="#b44fff"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="ring-center">
+              <span class="ring-pct" id="ringPct">0%</span>
+              <span class="ring-label">Saved</span>
+            </div>
+          </div>
+          <div class="stat-rows" id="statRows"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENCODING VISUALIZER -->
+  <section id="encode-section" class="hidden">
+    <div class="container">
+      <div class="section-label">Step 06</div>
+      <h2 class="section-title">Encoding Visualizer</h2>
+      <p class="section-desc">Watch each character transform into its binary code in real time.</p>
+      <div class="encode-chars glass" id="encodeChars"></div>
+      <div class="encoded-stream glass" id="encodedStream">
+        <span class="stream-label">Encoded Stream</span>
+        <div class="stream-bits" id="streamBits"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DECODE SECTION -->
+  <section id="decode-section" class="hidden">
+    <div class="container">
+      <div class="section-label">Step 07</div>
+      <h2 class="section-title">Decoding Visualizer</h2>
+      <p class="section-desc">Enter a binary string and watch the tree traversal decode it back to text.</p>
+      <div class="decode-wrap glass">
+        <div class="decode-input-row">
+          <input type="text" id="decodeInput" class="decode-input" placeholder="Paste binary string here (e.g. 10100011...)"/>
+          <button class="btn-action btn-generate" id="btnRunDecode" style="min-width:140px">Decode</button>
+        </div>
+        <div class="decode-output" id="decodeOutput"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LEARN SECTION -->
+  <section id="learn">
+    <div class="container">
+      <div class="section-label">Learn</div>
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-desc">Everything you need to know about Huffman coding and its applications.</p>
+
+      <div class="learn-grid">
+        <div class="learn-card glass" data-tilt>
+          <div class="learn-icon">📝</div>
+          <h3>What is Huffman Coding?</h3>
+          <p>A greedy algorithm that assigns shorter binary codes to more frequent characters, creating an optimal prefix-free code. Invented by David A. Huffman in 1952 at MIT.</p>
+        </div>
+<div class="learn-card glass" data-tilt>
+  <div class="learn-icon">🔒</div>
+  <h3>Why Lossless?</h3>
+  <p>No data is lost during compression. The original text can be fully recovered using the Huffman tree, so the output remains exactly the same as the input.</p>
+</div>
+
+<div class="learn-card glass" data-tilt>
+  <div class="learn-icon">⏱</div>
+  <h3>Time Complexity</h3>
+  <p>The algorithm is efficient and runs in O(n log n) time. It uses a priority queue to repeatedly combine the smallest values until the final tree is formed.</p>
+</div>
+
+<div class="learn-card glass" data-tilt>
+  <div class="learn-icon">🗜</div>
+  <h3>ZIP Files</h3>
+  <p>Used in ZIP and gzip files to reduce file size. It helps store files in less space and makes them faster to transfer.</p>
+</div>
+
+<div class="learn-card glass" data-tilt>
+  <div class="learn-icon">🖼</div>
+  <h3>PNG Images</h3>
+  <p>Used in PNG images to compress image data without losing quality, so the image looks the same but takes less space.</p>
+</div>
+
+<div class="learn-card glass" data-tilt>
+  <div class="learn-icon">📡</div>
+  <h3>Networks & Protocols</h3>
+  <p>Used in web and communication systems to reduce the size of data being sent, which makes data transfer faster and more efficient.</p>
+</div>
+       
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <span class="brand-icon">🗝️</span> HuffmanVisualizer
+        </div>
+        <p class="footer-copy">Huffman Coding Visualizer</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
